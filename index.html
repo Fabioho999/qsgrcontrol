@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Controle QSGR</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Sistema de Controle QSGR</h1>
+    </header>
+    <main>
+        <button class="button-primary" id="openModalBtn">Cadastrar Missão</button>
+
+        <div class="filter-group">
+            <input type="date" id="filterStart" placeholder="Data Início">
+            <input type="date" id="filterEnd" placeholder="Data Fim">
+            <input type="text" id="filterDestino" placeholder="Filtrar por Destino">
+            <input type="text" id="filterMilitar" placeholder="Filtrar por Militar">
+            <label for="filterStatus" class="visually-hidden">Filtrar por Status</label>
+            <select id="filterStatus">
+                <option value="">Todos Status</option>
+                <option value="Confeccionada">Confeccionada</option>
+                <option value="Assinada Cmt">Assinada Cmt</option>
+                <option value="Escaneada">Escaneada</option>
+                <option value="Enviada para Bda">Enviada para Bda</option>
+                <option value="Corrigir">Corrigir</option>
+                <option value="Ordem de Saque">Ordem de Saque</option>
+            </select>
+            <button class="button-secondary" id="applyFilterBtn">Aplicar Filtro</button>
+            <button class="button-secondary" id="clearFilterBtn">Limpar Filtros</button>
+        </div>
+
+        <button class="button-secondary" id="exportCsvBtn">Exportar CSV</button>
+
+        <table id="missionsTable">
+            <thead>
+                <tr>
+                    <th data-key="seq">Seq</th>
+                    <th data-key="dataIda">Data Ida</th>
+                    <th data-key="dataRetorno">Data Retorno</th>
+                    <th data-key="dias">Dias</th>
+                    <th data-key="diexNumber">DIEX nº</th>
+                    <th data-key="finalidade">Finalidade</th>
+                    <th data-key="destino">Destino</th>
+                    <th data-key="militares">Militares</th>
+                    <th data-key="evento">Evento</th>
+                    <th data-key="status">Status</th>
+                    <th data-key="">Boletim</th>
+                    <th data-key="">QSGR Assinada</th>
+                    <th data-key="">Ações</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <div class="pagination" id="pagination"></div>
+    </main>
+
+    <div class="modal-overlay" id="modalOverlay" aria-hidden="true" role="dialog" aria-labelledby="modalTitle">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">Cadastrar Missão</h2>
+                <button class="close-modal" id="closeModalBtn" aria-label="Fechar modal">&times;</button>
+            </div>
+            <form id="missionForm">
+                <input type="hidden" id="missionId">
+                <div class="form-group">
+                    <label for="dataIda">Data de Ida (DD/MM/AAAA HH:MM)<span class="required-star">*</span></label>
+                    <input type="datetime-local" id="dataIda" class="required" required>
+                </div>
+                <div class="form-group">
+                    <label for="dataRetorno">Data de Retorno (DD/MM/AAAA HH:MM)<span class="required-star">*</span></label>
+                    <input type="datetime-local" id="dataRetorno" class="required" required>
+                </div>
+                <div class="form-group">
+                    <label for="diexNumber">DIEX nº</label>
+                    <input type="text" id="diexNumber" placeholder="Ex: 1234/2025">
+                </div>
+                <div class="form-group">
+                    <label for="finalidade">Finalidade da Missão<span class="required-star">*</span></label>
+                    <input type="text" id="finalidade" class="required" required>
+                </div>
+                <div class="form-group">
+                    <label for="destino">Destino Completo<span class="required-star">*</span></label>
+                    <input type="text" id="destino" class="required" required>
+                </div>
+                <div class="form-group">
+                    <label for="militares">Lista de Militares (cada linha: Posto/Graduação - Nome)<span class="required-star">*</span></label>
+                    <textarea id="militares" class="required" placeholder="Ex: 3º Sargento - João Silva" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="evento">Evento Pré-Aprovado<span class="required-star">*</span></label>
+                    <select id="evento" class="required" required>
+                        <option value="Aditamento CMS nº 03">Aditamento CMS nº 03</option>
+                        <option value="Aditamento CMS nº 04">Aditamento CMS nº 04</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="status">Status QSGR<span class="required-star">*</span></label>
+                    <select id="status" class="required" required>
+                        <option value="Confeccionada">Confeccionada</option>
+                        <option value="Assinada Cmt">Assinada Cmt</option>
+                        <option value="Escaneada">Escaneada</option>
+                        <option value="Enviada para Bda">Enviada para Bda</option>
+                        <option value="Corrigir">Corrigir</option>
+                        <option value="Ordem de Saque">Ordem de Saque</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="boletimText">Boletim Interno (texto)</label>
+                    <textarea id="boletimText" placeholder="Digite o boletim interno..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="boletimFile">Anexar Boletim Interno (PDF)</label>
+                    <input type="file" id="boletimFile" accept="application/pdf">
+                </div>
+                <div class="form-group">
+                    <label for="signedQsgrFile">Anexar QSGR Assinada (PDF)</label>
+                    <input type="file" id="signedQsgrFile" accept="application/pdf">
+                </div>
+                <div class="form-group">
+                    <label for="observacoes">Observações</label>
+                    <textarea id="observacoes" placeholder="Digite observações adicionais..."></textarea>
+                </div>
+                <div class="form-group form-group-right">
+                    <button type="button" class="button-secondary" id="cancelBtn">Cancelar</button>
+                    <button type="submit" class="button-primary" id="saveBtn">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item"><div class="legend-color status-confeccionada"></div>Confeccionada</div>
+        <div class="legend-item"><div class="legend-color status-assinada"></div>Assinada Cmt</div>
+        <div class="legend-item"><div class="legend-color status-escaneada"></div>Escaneada</div>
+        <div class="legend-item"><div class="legend-color status-enviada"></div>Enviada para Bda</div>
+        <div class="legend-item"><div class="legend-color status-corrigir"></div>Corrigir</div>
+        <div class="legend-item"><div class="legend-color status-ordem"></div>Ordem de Saque</div>
+    </div>
+
+    <div class="toast" id="toast" aria-live="polite"></div>
+
+    <script src="script.js"></script>
+</body>
+<footer class="footer" style="text-align: center;"></footer>
+    <div class="footer-center">
+        Sistema criado pelo 3º Sgt Fábio Henrique de Oliveira Idt Mil 080252197-1.<br>
+        Todos os direitos reservados ao criador.<br>
+        Versão 1.0 - 02/06/2025
+    </div>
+</footer>
+</body>
+</html>
